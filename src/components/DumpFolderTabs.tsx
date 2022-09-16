@@ -7,8 +7,6 @@ import { createDumpFile } from "../lib/DumpFileUtils";
 import { Card, Tabs } from "antd";
 import { GraphsLoadedContext } from "../contexts/GraphsLoadedContext";
 
-const { TabPane } = Tabs;
-
 const EMPTY_TAB_NAME = "empty";
 
 interface Props {
@@ -58,26 +56,26 @@ export default function DumpFolderTabs(props: Props) {
   }, []);
 
   const handleTabChange = useCallback(
-    (selectedTabIndex) => setSelectedTabIndex(selectedTabIndex),
+    (selectedTabIndex: string) =>
+      setSelectedTabIndex(parseInt(selectedTabIndex)),
     []
   );
 
   const tabs = buildTabs(dumpDirectoryMap);
-  const tabId = tabs[selectedTabIndex]?.id;
+  const tabId = tabs[selectedTabIndex]?.id ?? EMPTY_TAB_NAME;
   const listOfBgvFiles = dumpDirectoryMap.get(tabId) || [];
+
+  const panes = tabs.map((tab) => ({
+    key: tab.id,
+    label: tab.content,
+    children: (
+      <BgvFileList listOfBgvFiles={listOfBgvFiles} searchQuery={methodFilter} />
+    ),
+  }));
 
   return (
     <Card>
-      <Tabs onSelect={handleTabChange}>
-        {tabs.map((tab) => (
-          <TabPane key={tab.id} tab={tab.content}>
-            <BgvFileList
-              listOfBgvFiles={listOfBgvFiles}
-              searchQuery={methodFilter}
-            />
-          </TabPane>
-        ))}
-      </Tabs>
+      <Tabs onTabClick={handleTabChange} items={panes} />
     </Card>
   );
 }

@@ -78,7 +78,9 @@ export default function BgvFileList(props: Props) {
     setTreeData(initialTreeData);
   }, [listOfBgvFiles]);
 
-  const onLoadData = (node: EventDataNode): Promise<void> =>
+  const onLoadData = (
+    node: EventDataNode<CompilerPhaseTreeDataNode>
+  ): Promise<void> =>
     new Promise<void>((resolve) => {
       const { key, children } = node;
 
@@ -88,7 +90,7 @@ export default function BgvFileList(props: Props) {
       }
 
       if ("dumpFile" in node) {
-        const { dumpFile } = node as EventDataNode & CompilerPhaseTreeDataNode;
+        const { dumpFile } = node as EventDataNode<CompilerPhaseTreeDataNode>;
 
         // Fetch list of phases here.
         return window.ipc_events

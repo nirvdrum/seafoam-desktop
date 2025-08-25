@@ -14,7 +14,7 @@
     "lint:fix": "eslint --fix --ignore-path .gitignore --ext .js,.jsx,.ts,.tsx .",
     "prettier": "prettier --list-different .",
     "prettier:fix": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "keywords": [],
   "author": {

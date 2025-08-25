@@ -9,7 +9,7 @@ Development
 -----------
 
 Seafoam Desktop is a React-based Electron app. As such, you'll need a functioning Node environment if you would like to
-build Seafoam Desktop from source. We use `yarn` to manage dependencies and execute custom scripts. A non-exhaustive
+build Seafoam Desktop from source. We use `npm` to manage dependencies and execute custom scripts. A non-exhaustive
 list of technologies used in this project are:
 
 * React
@@ -24,12 +24,12 @@ To get started:
 ```bash
 $ git clone https://github.com/Shopify/seafoam-desktop.git
 $ cd seafoam-desktop
-$ yarn install
-$ yarn prepare
-$ yarn start
+$ npm install
+$ npm run prepare
+$ npm start
 ```
 
-Executing `yarn start` will start up the Electron application and a local web server running the React portion of the
+Executing `npm start` will start up the Electron application and a local web server running the React portion of the
 project. _package.json_ lists several other scripts to help with code formatting, linting, building an Electron
 distribution, and so on.
 
@@ -39,14 +39,14 @@ As an Electron-based application, you'll need to have Node installed. Our CI sys
 version of Node and the most recent LTS. Since Electron packages up the Node environment in the final distribution,
 we do not need to support a wide range of Node versions.
 
-If on macOS and using Homebrew, you can install _yarn`, which will also install Node as a dependency:
+If on macOS and using Homebrew, you can install Node:
 
 ```bash
-$ brew install yarn
+$ brew install node
 ```
 
 On other operating systems, you'll probably be best off using whichever Node version manager you use on that platform
-and install a compatible version. You'll also want to [install the _yarn_ package manager](https://yarnpkg.com/getting-started/install).
+and install a compatible version. npm is included with Node.js installations.
 
 As a wrapper around Seafoam, this project requires Seafoam to exist on the target system. In particular, the `seafoam`
 command must be available on the `PATH`. The Seafoam docs have [installation steps](https://github.com/shopify/seafoam#installation)
@@ -77,6 +77,6 @@ had to disqualify that as an option. Electron was one of the last options that m
 
 * When running Seafoam Desktop in development on macOS, the application name in the menu will appear as "Electron". The
 name will be correct when running from a built distribution.
-* If doing active development, please ensure you've run `yarn prepare`, which will set up git pre-commit hooks. The
+* If doing active development, please ensure you've run `npm run prepare`, which will set up git pre-commit hooks. The
 project does have CI configured, but it's best to catch linting and formatting issues before you've pushed commits.
 

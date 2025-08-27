@@ -99,8 +99,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@ant-design/icons": "^4.7.0",
-    "antd": "^4.19.3",
+    "@ant-design/icons": "^6.0.0",
+    "antd": "^5.27.1",
     "d3-graphviz": "^4.0.0",
     "electron-log": "^4.4.5",
     "electron-squirrel-startup": "^1.0.0",

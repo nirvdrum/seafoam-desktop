@@ -79,8 +79,8 @@
     "@electron-forge/plugin-webpack": "6.0.0-beta.66",
     "@eslint/js": "^9.34.0",
     "@types/d3-graphviz": "^2.6.7",
-    "@types/react": "^18.0.20",
-    "@types/react-dom": "^18.0.6",
+    "@types/react": "^19.1.11",
+    "@types/react-dom": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
     "@vercel/webpack-asset-relocator-loader": "1.7.3",
@@ -106,8 +106,8 @@
     "electron-squirrel-startup": "^1.0.0",
     "graphviz-react": "^1.2.0",
     "immutable": "^4.0.0-rc.14",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "tmp-promise": "^3.0.2"
   }
 }

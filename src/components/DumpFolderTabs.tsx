@@ -26,7 +26,7 @@ export default function DumpFolderTabs(props: Props) {
   const { methodFilter } = props;
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [dumpDirectoryMap, setDumpDirectoryMap] = useState<DumpDirectoryMap>(
-    Map({ [EMPTY_TAB_NAME]: [] })
+    Map([[EMPTY_TAB_NAME, []]])
   );
   const { setGraphsLoaded } = useContext(GraphsLoadedContext);
 
@@ -39,7 +39,7 @@ export default function DumpFolderTabs(props: Props) {
         );
 
         if (dumpDirectoryMap.has(EMPTY_TAB_NAME)) {
-          setDumpDirectoryMap(Map({ [payload.directoryName]: files }));
+          setDumpDirectoryMap(Map([[payload.directoryName, files]]));
         } else {
           setDumpDirectoryMap(
             dumpDirectoryMap.set(payload.directoryName, files)
@@ -56,26 +56,28 @@ export default function DumpFolderTabs(props: Props) {
   }, []);
 
   const handleTabChange = useCallback(
-    (selectedTabIndex: string) =>
-      setSelectedTabIndex(parseInt(selectedTabIndex)),
+    (activeKey: string) => setSelectedTabIndex(parseInt(activeKey)),
     []
   );
 
   const tabs = buildTabs(dumpDirectoryMap);
-  const tabId = tabs[selectedTabIndex]?.id ?? EMPTY_TAB_NAME;
+  const tabId = tabs[selectedTabIndex]?.id;
   const listOfBgvFiles = dumpDirectoryMap.get(tabId) || [];
 
-  const panes = tabs.map((tab) => ({
-    key: tab.id,
+  const tabItems = tabs.map((tab, index) => ({
+    key: index.toString(),
     label: tab.content,
     children: (
-      <BgvFileList listOfBgvFiles={listOfBgvFiles} searchQuery={methodFilter} />
+      <BgvFileList
+        listOfBgvFiles={index === selectedTabIndex ? listOfBgvFiles : []}
+        searchQuery={methodFilter}
+      />
     ),
   }));
 
   return (
     <Card>
-      <Tabs onTabClick={handleTabChange} items={panes} />
+      <Tabs items={tabItems} onChange={handleTabChange} />
     </Card>
   );
 }

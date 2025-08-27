@@ -1,5 +1,6 @@
 import {
   app,
+  BaseWindow,
   BrowserWindow,
   dialog,
   Menu,
@@ -17,10 +18,8 @@ const macMenu: MenuItemConstructorOptions = {
   role: "appMenu",
 };
 
-export function openDirectoryChooser(
-  browserWindow: Option<BrowserWindow>
-): void {
-  if (!browserWindow) {
+export function openDirectoryChooser(browserWindow: Option<BaseWindow>): void {
+  if (!browserWindow || !(browserWindow instanceof BrowserWindow)) {
     ElectronLog.error(
       "'Open BGV Directory' menu opened without an attached browser window."
     );

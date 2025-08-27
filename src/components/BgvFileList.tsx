@@ -90,7 +90,8 @@ export default function BgvFileList(props: Props) {
       }
 
       if ("dumpFile" in node) {
-        const { dumpFile } = node as EventDataNode<CompilerPhaseTreeDataNode>;
+        const { dumpFile } = node as EventDataNode<CompilerPhaseTreeDataNode> &
+          CompilerPhaseTreeDataNode;
 
         // Fetch list of phases here.
         return window.ipc_events

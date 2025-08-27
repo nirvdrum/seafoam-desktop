@@ -31,26 +31,30 @@ const styles = {
   },
 };
 
-const root = ReactDOM.createRoot(document.getElementById("app") as HTMLElement);
+const root = ReactDOM.createRoot(document.querySelector("#app")!);
+
+function App() {
+  return (
+    <div style={styles.app as React.CSSProperties}>
+      <ErrorBoundary>
+        <GraphsLoadedProvider>
+          <GraphDataSourceProvider>
+            <div style={styles.box as React.CSSProperties}>
+              <div style={styles.left as React.CSSProperties}>
+                <LeftPanel />
+              </div>
+              <div style={styles.right as React.CSSProperties}>
+                <RightPanel />
+              </div>
+            </div>
+          </GraphDataSourceProvider>
+        </GraphsLoadedProvider>
+      </ErrorBoundary>
+    </div>
+  );
+}
 
 // The App is tentatively split into two "sections". This is achieved by using two full-height divs, and using CSS flex
 // to create a 2:1 ratio between the right and left panel.
 
-root.render(
-  <div style={styles.app as React.CSSProperties}>
-    <ErrorBoundary>
-      <GraphsLoadedProvider>
-        <GraphDataSourceProvider>
-          <div style={styles.box as React.CSSProperties}>
-            <div style={styles.left as React.CSSProperties}>
-              <LeftPanel />
-            </div>
-            <div style={styles.right as React.CSSProperties}>
-              <RightPanel />
-            </div>
-          </div>
-        </GraphDataSourceProvider>
-      </GraphsLoadedProvider>
-    </ErrorBoundary>
-  </div>
-);
+root.render(<App />);

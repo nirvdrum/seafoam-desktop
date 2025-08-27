@@ -28,4 +28,6 @@
 
 import "./index.css";
 
+// IPC functionality exposed by preload script
+
 import "./App";

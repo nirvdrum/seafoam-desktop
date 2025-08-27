@@ -6,29 +6,25 @@
 // The preload script allows us to selectively expose some functionality to the
 // renderer process.
 
-import { contextBridge, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
 import {
   IPCEvents,
   IPCPayload,
   LoadedPhaseDataPayload,
   LoadPhaseDataPayload,
 } from "../events";
-import ElectronLog from "electron-log";
-
-// Enable IPC logging (must be configured here to work in the renderer process).
-ElectronLog.transports!.ipc!.level! = "silly";
 
 function subscribe<Event extends keyof IPCPayload>(
   event: Event,
   callback: (payload: IPCPayload[Event]) => void
 ) {
-  ElectronLog.debug("IPC subscribe:", event);
+  console.debug("IPC subscribe:", event);
 
   ipcRenderer.on(event, (event, args) => callback(args));
 }
 
 function unsubscribe<Event extends keyof IPCPayload>(event: Event) {
-  ElectronLog.debug("IPC unsubscribe:", event);
+  console.debug("IPC unsubscribe:", event);
 
   ipcRenderer.removeAllListeners(event);
 }
@@ -37,7 +33,7 @@ function send<Event extends keyof IPCPayload>(
   event: IPCEvents,
   payload: IPCPayload[Event]
 ) {
-  ElectronLog.debug("IPC send:", event, payload);
+  console.debug("IPC send:", event, payload);
 
   ipcRenderer.send(event, payload);
 }
@@ -54,12 +50,16 @@ export interface IPC<Event extends IPCEvents> {
   ) => Promise<LoadedPhaseDataPayload>;
 }
 
-contextBridge.exposeInMainWorld("ipc_events", {
+// Without contextBridge, directly attach to window
+(
+  window as unknown as { ipc_events: IPC<IPCEvents>; logger: Console }
+).ipc_events = {
   subscribe: subscribe,
   unsubscribe: unsubscribe,
   send: send,
   fetchPhases: (payload: LoadPhaseDataPayload) =>
     ipcRenderer.invoke(IPCEvents.LoadPhaseData, payload),
-});
+};
 
-contextBridge.exposeInMainWorld("logger", ElectronLog);
+(window as unknown as { ipc_events: IPC<IPCEvents>; logger: Console }).logger =
+  console;

@@ -26,7 +26,7 @@ export default function DumpFolderTabs(props: Props) {
   const { methodFilter } = props;
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [dumpDirectoryMap, setDumpDirectoryMap] = useState<DumpDirectoryMap>(
-    Map({ [EMPTY_TAB_NAME]: [] })
+    Map([[EMPTY_TAB_NAME, []]])
   );
   const { setGraphsLoaded } = useContext(GraphsLoadedContext);
 
@@ -39,7 +39,7 @@ export default function DumpFolderTabs(props: Props) {
         );
 
         if (dumpDirectoryMap.has(EMPTY_TAB_NAME)) {
-          setDumpDirectoryMap(Map({ [payload.directoryName]: files }));
+          setDumpDirectoryMap(Map([[payload.directoryName, files]]));
         } else {
           setDumpDirectoryMap(
             dumpDirectoryMap.set(payload.directoryName, files)

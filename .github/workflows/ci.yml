@@ -7,23 +7,26 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ["16.x", "17.x"]
+        node-version: ["20.x", "22.x"]
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Checkout
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: "npm"
 
       - name: 📦 Install dependencies
-        run: yarn --frozen-lockfile
+        run: npm ci
 
       - name: 🚔 Run Lint
-        run: yarn lint
+        run: npm run lint
 
       - name: 💅🏼 Run Prettier
-        run: yarn prettier
+        run: npm run prettier
+
+      - name: 🏗️ Check TypeScript
+        run: npx tsc --noEmit

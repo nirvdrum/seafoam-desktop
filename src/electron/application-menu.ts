@@ -10,8 +10,7 @@ import * as fs from "fs";
 import { IPCEvents } from "../events";
 import ElectronLog from "electron-log";
 import { IS_MAC } from "./utils";
-
-const GRAAL_DUMP_EXTENSION = ".bgv";
+import { GRAAL_DUMP_EXTENSIONS } from "../lib/constants";
 
 const macMenu: MenuItemConstructorOptions = {
   label: app.name,
@@ -39,7 +38,7 @@ export function openDirectoryChooser(browserWindow: Option<BaseWindow>): void {
             ElectronLog.error(err);
           } else {
             const dumpFiles = files.filter((file) =>
-              file.endsWith(GRAAL_DUMP_EXTENSION)
+              GRAAL_DUMP_EXTENSIONS.some((ext) => file.endsWith(ext))
             );
 
             browserWindow.webContents.send(IPCEvents.DirectoryLoaded, {
@@ -65,7 +64,7 @@ const primaryMenu: MenuItemConstructorOptions = {
             filters: [
               {
                 name: "Graal Dump File",
-                extensions: [GRAAL_DUMP_EXTENSION.substr(1)],
+                extensions: ["bgv", "bgv.gz"],
               },
             ],
             properties: ["openFile", "dontAddToRecent"],

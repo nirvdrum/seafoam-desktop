@@ -85,7 +85,33 @@ export async function fetchCompilerPhases(
 
   const phases = validPhases.map((phase) => {
     // The type value indicates what type of graph (e.g., TruffleIR or TruffleAST) was generated for this method.
-    const [type, methodName] = phase.graph_name_components[0].split("::");
+    let targetName = phase.graph_name_components[0];
+
+    // Handle different delimiter formats:
+    // - "TruffleIR.Tier2.Object#foo_<split-1501>()" -> type: "Object", method: "foo_<split-1501>"
+    // - "SomeType::methodName()" -> type: "SomeType", method: "methodName"
+    let type: string;
+    let methodName: string;
+    if (targetName.includes("#")) {
+      // Format: "TruffleIR.Tier2.Object#foo_<split-1501>()"
+      const parts = targetName.split("#");
+
+      // Extract the last part after the last dot before the #
+      const beforeHash = parts[0];
+      const dotParts = beforeHash.split(".");
+      type = dotParts[dotParts.length - 1];
+      methodName = parts[1];
+    } else if (targetName.includes("::")) {
+      // Format: "SomeType::methodName()"
+      const parts = targetName.split("::");
+
+      type = parts[0];
+      methodName = parts[1];
+    } else {
+      // Fallback: treat the whole thing as type with empty method
+      type = targetName;
+      methodName = "";
+    }
 
     return {
       filename: phase.graph_file,

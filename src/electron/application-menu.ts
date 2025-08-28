@@ -10,13 +10,45 @@ import * as fs from "fs";
 import { IPCEvents } from "../events";
 import ElectronLog from "electron-log";
 import { IS_MAC } from "./utils";
-
-const GRAAL_DUMP_EXTENSION = ".bgv";
+import { GRAAL_DUMP_EXTENSIONS } from "../lib/constants";
+import * as path from "path";
 
 const macMenu: MenuItemConstructorOptions = {
   label: app.name,
   role: "appMenu",
 };
+
+export function openFileChooser(browserWindow: Option<BaseWindow>): void {
+  if (!browserWindow || !(browserWindow instanceof BrowserWindow)) {
+    ElectronLog.error(
+      "'Open BGV File' menu opened without an attached browser window."
+    );
+    return;
+  }
+
+  dialog
+    .showOpenDialog(browserWindow, {
+      filters: [
+        {
+          name: "Graal Dump File",
+          extensions: GRAAL_DUMP_EXTENSIONS.map((ext) => ext.replace(".", "")),
+        },
+      ],
+      properties: ["openFile", "dontAddToRecent"],
+    })
+    .then((result) => {
+      if (!result.canceled) {
+        const filePath = result.filePaths[0];
+        const directory = path.dirname(filePath);
+        const filename = path.basename(filePath);
+
+        browserWindow.webContents.send(IPCEvents.DirectoryLoaded, {
+          directoryName: directory,
+          files: [filename],
+        });
+      }
+    });
+}
 
 export function openDirectoryChooser(browserWindow: Option<BaseWindow>): void {
   if (!browserWindow || !(browserWindow instanceof BrowserWindow)) {
@@ -39,7 +71,7 @@ export function openDirectoryChooser(browserWindow: Option<BaseWindow>): void {
             ElectronLog.error(err);
           } else {
             const dumpFiles = files.filter((file) =>
-              file.endsWith(GRAAL_DUMP_EXTENSION)
+              GRAAL_DUMP_EXTENSIONS.some((ext) => file.endsWith(ext))
             );
 
             browserWindow.webContents.send(IPCEvents.DirectoryLoaded, {
@@ -55,29 +87,12 @@ export function openDirectoryChooser(browserWindow: Option<BaseWindow>): void {
 const primaryMenu: MenuItemConstructorOptions = {
   label: "File",
   submenu: [
-    // TODO (kmenard 22-Jul-21): Re-enable once the UI supports loading single BGV files.
-    /*
     {
       label: "Open BGV File",
       click: (_menuItem, browserWindow, _event) => {
-        dialog
-          .showOpenDialog(browserWindow, {
-            filters: [
-              {
-                name: "Graal Dump File",
-                extensions: [GRAAL_DUMP_EXTENSION.substr(1)],
-              },
-            ],
-            properties: ["openFile", "dontAddToRecent"],
-          })
-          .then((result) => {
-            if (!result.canceled) {
-              const filename = result.filePaths[0];
-              ElectronLog.debug(filename);
-            }
-          });
+        openFileChooser(browserWindow);
       },
-    },*/
+    },
     {
       label: "Open BGV Directory",
       click: (_menuItem, browserWindow, _event) => {

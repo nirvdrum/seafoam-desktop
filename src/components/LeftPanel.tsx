@@ -12,7 +12,10 @@ const LeftPanel: React.FunctionComponent = () => {
   };
 
   return (
-    <Card title="Graal Dump Folders">
+    <Card
+      title="Graal Dump Folders"
+      style={{ height: "100%", overflow: "auto" }}
+    >
       <SearchMethodTextField methodFilter={methodFilter} />
       <br />
       <DumpFolderTabs methodFilter={query} />

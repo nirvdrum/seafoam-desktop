@@ -2,30 +2,31 @@ import * as React from "react";
 import { useCallback, useContext, useEffect, useState } from "react";
 import BgvFileList from "./BgvFileList";
 import { DirectoryLoadedPayload, IPCEvents } from "../events";
-import { Map } from "immutable";
 import { createDumpFile } from "../lib/DumpFileUtils";
-import { Card, Tabs } from "antd";
+import { Collapse, Space, Button, Typography, Divider } from "antd";
 import { GraphsLoadedContext } from "../contexts/GraphsLoadedContext";
+import { CloseOutlined, FolderOpenOutlined } from "@ant-design/icons";
+
+const { Panel } = Collapse;
+const { Text } = Typography;
 
 interface Props {
   methodFilter: string;
 }
 
-function buildTabs(loadedDumps: DumpDirectoryMap) {
-  return Array.from(loadedDumps.keys()).map((directoryName) => {
-    return {
-      id: directoryName,
-      content: directoryName.split("/").pop() || directoryName,
-    };
-  });
+interface DirectorySection {
+  key: string;
+  directoryPath: string;
+  directoryName: string;
+  files: DumpFile[];
 }
 
 export default function DumpFolderTabs(props: Props) {
   const { methodFilter } = props;
-  const [activeKey, setActiveKey] = useState<string>("");
-  const [dumpDirectoryMap, setDumpDirectoryMap] = useState<DumpDirectoryMap>(
-    Map()
+  const [dumpDirectories, setDumpDirectories] = useState<DirectorySection[]>(
+    []
   );
+  const [activeKeys, setActiveKeys] = useState<string[]>([]);
   const { setGraphsLoaded } = useContext(GraphsLoadedContext);
 
   useEffect(() => {
@@ -34,13 +35,21 @@ export default function DumpFolderTabs(props: Props) {
         createDumpFile(payload.directoryName, filename)
       );
 
-      // Create a unique key for this tab
-      const tabKey = `${payload.directoryName}_${Date.now()}`;
+      // Create a unique key for this directory section
+      const sectionKey = `${payload.directoryName}_${Date.now()}`;
+      const directoryName =
+        payload.directoryName.split("/").pop() || payload.directoryName;
 
-      setDumpDirectoryMap((prevMap) => prevMap.set(tabKey, files));
+      const newSection: DirectorySection = {
+        key: sectionKey,
+        directoryPath: payload.directoryName,
+        directoryName: directoryName,
+        files: files,
+      };
 
-      // Set this as the active tab
-      setActiveKey(tabKey);
+      setDumpDirectories((prev) => [...prev, newSection]);
+      // Auto-expand the newly added directory
+      setActiveKeys((prev) => [...prev, sectionKey]);
       setGraphsLoaded(true);
     };
 
@@ -54,72 +63,98 @@ export default function DumpFolderTabs(props: Props) {
     };
   }, [setGraphsLoaded]);
 
-  const handleTabChange = useCallback((newActiveKey: string) => {
-    setActiveKey(newActiveKey);
-  }, []);
+  const handleRemoveDirectory = useCallback(
+    (sectionKey: string, event: React.MouseEvent) => {
+      event.stopPropagation();
 
-  const handleTabEdit = useCallback(
-    (
-      targetKey: React.MouseEvent | React.KeyboardEvent | string,
-      action: "add" | "remove"
-    ) => {
-      if (action === "remove" && typeof targetKey === "string") {
-        setDumpDirectoryMap((prevMap) => {
-          const newMap = prevMap.delete(targetKey);
+      setDumpDirectories((prev) => {
+        const newDirectories = prev.filter((dir) => dir.key !== sectionKey);
 
-          // If we're closing the active tab, switch to another tab
-          if (targetKey === activeKey) {
-            const remainingKeys = Array.from(newMap.keys());
-            if (remainingKeys.length > 0) {
-              // Switch to the last tab
-              setActiveKey(remainingKeys[remainingKeys.length - 1]);
-            } else {
-              setActiveKey("");
-            }
-          }
+        // Update graphs loaded state if no directories remain
+        if (newDirectories.length === 0) {
+          setGraphsLoaded(false);
+        }
 
-          // Update graphs loaded state if no tabs remain
-          if (newMap.size === 0) {
-            setGraphsLoaded(false);
-          }
+        return newDirectories;
+      });
 
-          return newMap;
-        });
-      }
+      // Remove from active keys if present
+      setActiveKeys((prev) => prev.filter((key) => key !== sectionKey));
     },
-    [activeKey, setGraphsLoaded]
+    [setGraphsLoaded]
   );
 
-  const tabs = buildTabs(dumpDirectoryMap);
-  const listOfBgvFiles = dumpDirectoryMap.get(activeKey) || [];
+  const handleCollapseChange = useCallback((keys: string | string[]) => {
+    setActiveKeys(Array.isArray(keys) ? keys : [keys]);
+  }, []);
 
-  const tabItems = tabs.map((tab) => ({
-    key: tab.id,
-    label: <span title={tab.id.split("_")[0]}>{tab.content}</span>,
-    closable: true,
-    children: (
-      <BgvFileList
-        listOfBgvFiles={tab.id === activeKey ? listOfBgvFiles : []}
-        searchQuery={methodFilter}
-      />
-    ),
-  }));
+  if (dumpDirectories.length === 0) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <Text type="secondary">
+          No dump directories loaded. Use File menu to open a BGV file or
+          directory.
+        </Text>
+      </div>
+    );
+  }
 
   return (
-    <Card style={{ overflow: "hidden" }}>
-      <Tabs
-        type="editable-card"
-        hideAdd
-        items={tabItems}
-        activeKey={activeKey}
-        onChange={handleTabChange}
-        onEdit={handleTabEdit}
-        tabBarStyle={{
-          marginBottom: 0,
-          overflow: "auto",
-          whiteSpace: "nowrap",
-        }}
-      />
-    </Card>
+    <Space direction="vertical" style={{ width: "100%" }}>
+      {dumpDirectories.map((directory, index) => (
+        <div key={directory.key}>
+          {index > 0 && <Divider style={{ margin: "12px 0" }} />}
+          <Collapse
+            activeKey={activeKeys}
+            onChange={handleCollapseChange}
+            expandIcon={({ isActive }) => (
+              <FolderOpenOutlined rotate={isActive ? 0 : -90} />
+            )}
+            style={{
+              background: "#fafafa",
+              border: "1px solid #d9d9d9",
+              borderRadius: "4px",
+            }}
+          >
+            <Panel
+              key={directory.key}
+              header={
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <span title={directory.directoryPath}>
+                    <strong>{directory.directoryName}</strong>
+                    <Text
+                      type="secondary"
+                      style={{ marginLeft: "8px", fontSize: "12px" }}
+                    >
+                      ({directory.files.length} files)
+                    </Text>
+                  </span>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<CloseOutlined />}
+                    onClick={(e) => handleRemoveDirectory(directory.key, e)}
+                    style={{ marginLeft: "auto" }}
+                  />
+                </div>
+              }
+              style={{ marginBottom: 0 }}
+            >
+              <BgvFileList
+                listOfBgvFiles={directory.files}
+                searchQuery={methodFilter}
+              />
+            </Panel>
+          </Collapse>
+        </div>
+      ))}
+    </Space>
   );
 }

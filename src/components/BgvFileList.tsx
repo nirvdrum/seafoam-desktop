@@ -132,7 +132,9 @@ export default function BgvFileList(props: Props) {
   };
 
   const filteredTreeRoots = treeData.filter(
-    (value) => !searchQuery || value.title?.toString().includes(searchQuery)
+    (value) =>
+      !searchQuery ||
+      value.title?.toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
